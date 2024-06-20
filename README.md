@@ -51,3 +51,72 @@ This Azure Functions project provides a serverless HTTP endpoint to convert Micr
           }
       }
       ```
+
+## Usage
+
+### Local Development
+
+1. **Run the Function App Locally**:
+    ```bash
+    func start
+    ```
+
+2. **Test the Function**:
+    - Send an HTTP POST request to `http://localhost:7071/api/http_trigger` with the following JSON body:
+      ```json
+      {
+          "container_name": "input-container",
+          "output_container_name": "output-container"
+      }
+      ```
+
+### Docker
+
+#### Local Development Dockerfile
+
+- Use `Dockerfile.local` for local development, which includes all necessary configurations for running the function app locally.
+
+#### Production Dockerfile
+
+- Use `Dockerfile` for production deployment to Azure. This Dockerfile is optimized for running the function app in the Azure environment.
+
+**Build and Run Locally with Docker**:
+
+1. **Build the Docker Image**:
+    ```bash
+    docker build -t access-to-csv-converter -f Dockerfile.local .
+    ```
+
+2. **Run the Docker Container**:
+    ```bash
+    docker run -p 7071:80 -e AzureWebJobsStorage="YOUR_BLOB_STORAGE_CONNECTION_STRING" access-to-csv-converter
+    ```
+
+## Deployment
+
+1. **Deploy to Azure**:
+    ```bash
+    func azure functionapp publish <YourFunctionAppName>
+    ```
+
+2. **Configure Application Settings**:
+    - Set `AzureWebJobsStorage` to your Blob Storage connection string in the Azure Function App's Configuration settings on the Azure portal.
+
+## Endpoints
+
+### HTTP Trigger
+
+- **URL**: `/api/http_trigger`
+- **Method**: POST
+- **Parameters**:
+    - `container_name` (string): The name of the Azure Blob Storage container with Access files.
+    - `output_container_name` (string): The name of the Azure Blob Storage container to save CSV files.
+
+**Example Request**:
+```bash
+curl -X POST "http://<your-function-app-name>.azurewebsites.net/api/http_trigger" \
+    -H "Content-Type: application/json" \
+    -d '{
+        "container_name": "input-container",
+        "output_container_name": "output-container"
+    }'
